@@ -31,7 +31,7 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>qt5.9.4-msvc2017-x64</QtInstall>
-    <QtModules>core</QtModules>
+    <QtModules>core;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
@@ -54,16 +54,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\3dpart\lpmqservice\include;F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\include\lpmessagedefine;F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\include\lpbusinessutils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\3dpart\lpmqservice\include;F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\include\lpmessagedefine;F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\include\lpbusinessutils;F:\JCDLL(2)\lplabelAlarm\lplabelAlarm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\3dpart\lpmqservice\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>lpmqservice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\3dpart\lpmqservice\lib\x64;F:\JCDLL(2)\lplabelAlarm\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>lpmqservice.lib;redhandapid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

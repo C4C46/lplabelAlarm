@@ -7,7 +7,7 @@
 #include "redhandapi_global.h"
 #include <QString>
 #include <QMessageBox>
-
+#pragma execution_character_set("utf-8")
 
 
 struct Lithium_alarm
@@ -19,20 +19,11 @@ struct Lithium_alarm
 	bool bShow;
 	int level;
 	bool isResident;
+	double length;
 };
 
 
-//QDataStream &operator<<(QDataStream &out, const Lithium_alarm &alarm)
-//{
-//	out << alarm.alarmType
-//		<< alarm.evt_name
-//		<< alarm.evt_detail
-//		<< alarm.bOverlay
-//		<< alarm.bShow
-//		<< alarm.level
-//		<< alarm.isResident;
-//	return out;
-//}
+
 
 QDataStream &operator>>(QDataStream &in, Lithium_alarm &alarm);
 
@@ -43,7 +34,8 @@ public:
 	~LPRedHandAlarm();
 	void sendFlawDefectAlarmInfo(int alarmType, const QString& evt_name,
 		const QString& evt_detail, bool bOverlay,
-		bool bShow, int level, bool isResidents);
+		bool bShow, int level, bool isResidents, double length);
+
 };
 
 class LPMQSERVICE_API lplabelAlarm : public LPMQService
@@ -53,7 +45,7 @@ public:
 
 	virtual void recvMsg(QByteArray& ba, const MsgReceiverInfo& receiverInfo);
 	void handleLithium(const Lithium_alarm &alarms);
-
+	QMap<QString, QPair<double, double>> parseWarningValues();
 
 private:
 	LPRedHandAlarm* m_pAlarmRH;
