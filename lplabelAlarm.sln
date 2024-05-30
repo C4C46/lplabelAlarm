@@ -5,6 +5,11 @@ VisualStudioVersion = 15.0.33529.398
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lplabelAlarm", "lplabelAlarm\lplabelAlarm.vcxproj", "{696D426C-7F66-4493-8BA1-12DB39A5F567}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testAlarm", "testAlarm\testAlarm.vcxproj", "{0AC4EEC2-6A76-47DE-976E-38564FAE6581}"
+	ProjectSection(ProjectDependencies) = postProject
+		{696D426C-7F66-4493-8BA1-12DB39A5F567} = {696D426C-7F66-4493-8BA1-12DB39A5F567}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -15,6 +20,10 @@ Global
 		{696D426C-7F66-4493-8BA1-12DB39A5F567}.Debug|x64.Build.0 = Debug|x64
 		{696D426C-7F66-4493-8BA1-12DB39A5F567}.Release|x64.ActiveCfg = Release|x64
 		{696D426C-7F66-4493-8BA1-12DB39A5F567}.Release|x64.Build.0 = Release|x64
+		{0AC4EEC2-6A76-47DE-976E-38564FAE6581}.Debug|x64.ActiveCfg = Debug|x64
+		{0AC4EEC2-6A76-47DE-976E-38564FAE6581}.Debug|x64.Build.0 = Debug|x64
+		{0AC4EEC2-6A76-47DE-976E-38564FAE6581}.Release|x64.ActiveCfg = Release|x64
+		{0AC4EEC2-6A76-47DE-976E-38564FAE6581}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

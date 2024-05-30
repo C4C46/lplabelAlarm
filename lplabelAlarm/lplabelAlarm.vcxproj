@@ -36,7 +36,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>qt5.9.4-msvc2017-x64</QtInstall>
-    <QtModules>core</QtModules>
+    <QtModules>core;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -57,13 +57,31 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\3dpart\lpmqservice\include;F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\include\lpmessagedefine;F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\include\lpbusinessutils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\3dpart\lpmqservice\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>lpmqservice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\include\lpmessagedefine;F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\include\lpbusinessutils;F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\3dpart\lpmqservice\include;F:\JCDLL(2)\lplabelAlarm\lplabelAlarm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>F:\JCDLL(2)\lplabelAlarm\lplabelAlarm\3dpart\lpmqservice\lib\x64;F:\JCDLL(2)\lplabelAlarm\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>lpmqservice.lib;redhandapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>LPLABELALARM_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>LPLABELALARM_LIB;LPMQSERVICE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -76,7 +94,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>LPLABELALARM_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>LPLABELALARM_LIB;LPMQSERVICE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -85,7 +103,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="lplabelalarm_global.h" />
-    <QtMoc Include="lplabelAlarm.h" />
+    <ClInclude Include="lplabelAlarm.h" />
     <ClCompile Include="lplabelAlarm.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -26,12 +26,11 @@
     <ClInclude Include="lplabelalarm_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <QtMoc Include="lplabelAlarm.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <ClCompile Include="lplabelAlarm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-
+    <ClInclude Include="lplabelAlarm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
