@@ -109,6 +109,8 @@ public:
 	void handleLithiumAlign(const LithiumCalculatebyInfoPub_Tag &Alignalarms);
 	QMap<QString, QMap<QString, QPair<double, double>>> lplabelAlarm::parseWarningValues();
 
+	QMap<int, QString> loadTypeDescriptions();
+
 private:
 	LPRedHandAlarm* m_pAlarmRH;
 

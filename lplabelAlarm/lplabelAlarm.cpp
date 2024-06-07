@@ -84,6 +84,31 @@ QMap<QString, QMap<QString, QPair<double, double>>> lplabelAlarm::parseWarningVa
 	return warningValues;
 }
 
+QMap<int, QString> lplabelAlarm::loadTypeDescriptions() {
+	QString jsonFilePath = QCoreApplication::applicationDirPath() + "/typeDescriptions.json";
+	QFile file(jsonFilePath);
+	QMap<int, QString> typeDescriptions;
+
+	if (!file.open(QIODevice::ReadOnly)) {
+		qWarning() << "Failed to open type descriptions file:" << jsonFilePath;
+		return typeDescriptions;
+	}
+
+	QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+	if (doc.isNull()) {
+		qWarning() << "Failed to create JSON doc from type descriptions.";
+		return typeDescriptions;
+	}
+
+	QJsonObject obj = doc.object();
+	for (auto key : obj.keys()) {
+		typeDescriptions.insert(key.toInt(), obj[key].toString());
+	}
+
+	return typeDescriptions;
+}
+
+
 //接收锂电信息
 void lplabelAlarm::recvMsg(QByteArray & ba, const MsgReceiverInfo & receiverInfo)
 {
@@ -118,13 +143,7 @@ void lplabelAlarm::handleLithiumWidth(const LithiumTypeInfoPub_Tag & Widthalarms
 {
 	static QMap<QString, QMap<QString, QPair<double, double>>> warningValues = parseWarningValues();
 
-	static const QMap<int, QString> typeDescriptions = {
-	{9001, "陶瓷区"},
-	{9002, "涂布区"},
-	{9003, "极耳区"},
-	{9004, "电浆区"}
-	};
-
+	static const QMap<int, QString> typeDescriptions = loadTypeDescriptions();
 
 
 	for (const SimpleFlawInfo &flawInfo : Widthalarms.simpleFlawInfoList)
@@ -153,12 +172,7 @@ void lplabelAlarm::handleLithiumWidth(const LithiumTypeInfoPub_Tag & Widthalarms
 void lplabelAlarm::handleLithiumAlign(const LithiumCalculatebyInfoPub_Tag &Alignalarms)
 {
 	static QMap<QString, QMap<QString, QPair<double, double>>> warningValues = parseWarningValues();
-	static const QMap<int, QString> typeDescriptions = {
-	{9001, "陶瓷区"},
-	{9002, "涂布区"},
-	{9003, "极耳区"},
-	{9004, "电浆区"}
-	};
+	static const QMap<int, QString> typeDescriptions = loadTypeDescriptions();
 
 	// 遍历所有通道
 	for (auto channelIter = Alignalarms.contactNameAndAlignment.begin(); channelIter != Alignalarms.contactNameAndAlignment.end(); ++channelIter) {
@@ -187,6 +201,8 @@ void lplabelAlarm::handleLithiumAlign(const LithiumCalculatebyInfoPub_Tag &Align
 	}
 
 }
+
+
 
 
 
