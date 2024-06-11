@@ -35,7 +35,7 @@ lplabelAlarm::lplabelAlarm(QString strName)
 QMap<QString, QMap<QString, QPair<double, double>>> lplabelAlarm::parseWarningValues()
 {
 
-	QString jsonFilePath = QCoreApplication::applicationDirPath() + "/Alarm_Lithium.json";
+	QString jsonFilePath = QCoreApplication::applicationDirPath() + "/Config/Alarm_Lithium.json";
 	QFile file(jsonFilePath);
 	QMap<QString, QMap<QString, QPair<double, double>>> warningValues;;
 
@@ -85,7 +85,7 @@ QMap<QString, QMap<QString, QPair<double, double>>> lplabelAlarm::parseWarningVa
 }
 
 QMap<int, QString> lplabelAlarm::loadTypeDescriptions() {
-	QString jsonFilePath = QCoreApplication::applicationDirPath() + "/typeDescriptions.json";
+	QString jsonFilePath = QCoreApplication::applicationDirPath() + "/Config/typeDescriptions.json";
 	QFile file(jsonFilePath);
 	QMap<int, QString> typeDescriptions;
 
