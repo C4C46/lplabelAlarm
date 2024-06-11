@@ -119,7 +119,7 @@ void lplabelAlarm::recvMsg(QByteArray & ba, const MsgReceiverInfo & receiverInfo
 	switch (type)
 	{
 		
-	case LP_ALARMMSG_PUB_ALARM_INFO:
+	case LP_SEND_WIDTH:
 	{
 		LithiumTypeInfoPub_Tag Widthalarms;
 		in >> Widthalarms;
@@ -132,6 +132,13 @@ void lplabelAlarm::recvMsg(QByteArray & ba, const MsgReceiverInfo & receiverInfo
 		LithiumCalculatebyInfoPub_Tag  Alignalarms;
 		in >> Alignalarms;
 		handleLithiumAlign(Alignalarms);
+		break;
+	}
+	case LP_SEND_CENTRALIZER:
+	{
+		LithiumElectrodeRegionCentralizePub_Tag Centeralarms;
+		in >> Centeralarms;
+		handleLithiumCentralizer(Centeralarms);
 		break;
 	}
 	default:
@@ -197,6 +204,30 @@ void lplabelAlarm::handleLithiumAlign(const LithiumCalculatebyInfoPub_Tag &Align
 					m_pAlarmRH->sendFlawDefectAlarmInfo(Alignalarms.detectType, eventName, eventDetail, false, true, 3, false);
 				}
 			}
+		}
+	}
+
+}
+
+void lplabelAlarm::handleLithiumCentralizer(const LithiumElectrodeRegionCentralizePub_Tag & Centeralarms)
+{
+	static QMap<QString, QMap<QString, QPair<double, double>>> warningValues = parseWarningValues();
+	static const QMap<int, QString> typeDescriptions = loadTypeDescriptions();
+
+	QString description = typeDescriptions.value(Centeralarms.detectType, "未知类型");
+	QString coorNodeName = Centeralarms.coorNodeName;
+	double centralizeValue = Centeralarms.electrodeRegionCentralize;
+	QString eventName = QString("%1_%2异常").arg(description).arg(coorNodeName);
+	QString eventDetail = QString("居中度异常值: %1").arg(centralizeValue);
+
+	if (warningValues.contains(QString::number(Centeralarms.detectType)) &&
+		warningValues[QString::number(Centeralarms.detectType)].contains(coorNodeName))
+	{
+		double max = warningValues[QString::number(Centeralarms.detectType)][coorNodeName].first;
+		double min = warningValues[QString::number(Centeralarms.detectType)][coorNodeName].second;
+		if (centralizeValue < min || centralizeValue > max)
+		{
+			m_pAlarmRH->sendFlawDefectAlarmInfo(Centeralarms.detectType, eventName, eventDetail, false, true, 3, false);
 		}
 	}
 

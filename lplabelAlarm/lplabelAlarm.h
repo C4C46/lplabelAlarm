@@ -82,6 +82,29 @@ struct  LithiumCalculatebyInfoPub_Tag
 };
 
 
+struct LithiumElectrodeRegionCentralizePub_Tag
+{
+	//极耳区域特殊属性
+	int msgId;//消息id
+	int detectType;//缺陷类型
+	double electrodeRegionCentralize{ -1 };//居中度；最左侧极耳宽度和最右侧极耳宽度之间差值作为居中度
+	qint64 doffId{ -1 };
+	qreal  doffY100PosMm{ -1 }; //局部y坐标精确mm,每隔100mm中取一个
+	QString coorNodeName;//工位名
+
+	//friend QDataStream& operator <<(QDataStream& stream, const LithiumElectrodeRegionCentralizePub_Tag& info) {
+	//	stream << info.msgId << info.detectType << info.electrodeRegionCentralize << info.doffId
+	//		<< info.doffY100PosMm << info.coorNodeName;
+	//}
+
+	friend QDataStream& operator >>(QDataStream& stream, LithiumElectrodeRegionCentralizePub_Tag& info)
+	{
+		stream >> info.msgId >> info.detectType >> info.electrodeRegionCentralize >> info.doffId
+			>> info.doffY100PosMm >> info.coorNodeName;
+		return stream;
+	}
+
+};
 
 
 
@@ -107,6 +130,8 @@ public:
 	void handleLithiumWidth(const LithiumTypeInfoPub_Tag &Widthalarms);
 
 	void handleLithiumAlign(const LithiumCalculatebyInfoPub_Tag &Alignalarms);
+
+	void handleLithiumCentralizer(const LithiumElectrodeRegionCentralizePub_Tag &Centeralarms);
 	QMap<QString, QMap<QString, QPair<double, double>>> lplabelAlarm::parseWarningValues();
 
 	QMap<int, QString> loadTypeDescriptions();
