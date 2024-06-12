@@ -5,6 +5,7 @@ lplabelAlarm::lplabelAlarm(QString strName)
 {
 
 	m_pAlarmRH = new LPRedHandAlarm();
+	parseWarningValues();
 }
 
 
@@ -30,35 +31,24 @@ lplabelAlarm::lplabelAlarm(QString strName)
 //
 //}
 
-
-
-QMap<QString, QMap<QString, QPair<double, double>>> lplabelAlarm::parseWarningValues()
-{
-
+void lplabelAlarm::parseWarningValues() {
 	QString jsonFilePath = QCoreApplication::applicationDirPath() + "/Config/Alarm_Lithium.json";
 	QFile file(jsonFilePath);
-	QMap<QString, QMap<QString, QPair<double, double>>> warningValues;;
-
 	if (!file.open(QIODevice::ReadOnly)) {
 		qWarning() << "Failed to open file:" << jsonFilePath;
-		return warningValues; // 返回空的 QMap
+		return;
 	}
 	QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-	if (doc.isNull()) {
-		qWarning() << "Failed to create JSON doc.";
-		return warningValues;
-	}
-	if (!doc.isObject()) {
-		qWarning() << "JSON document is not an object.";
-		return warningValues;
+	file.close();
+
+	if (doc.isNull() || !doc.isObject()) {
+		qWarning() << "Invalid JSON document.";
+		return;
 	}
 
+	QMap<QString, QMap<QString, QPair<double, double>>> newWarningValues;
 	QJsonObject obj = doc.object();
 	QJsonObject channels = obj["channels"].toObject();
-	if (channels.isEmpty()) {
-		qWarning() << "No 'channels' object in JSON file or 'channels' is empty.";
-		return warningValues;
-	}
 
 	for (auto channelId : channels.keys()) {
 		QJsonObject channel = channels[channelId].toObject();
@@ -68,21 +58,20 @@ QMap<QString, QMap<QString, QPair<double, double>>> lplabelAlarm::parseWarningVa
 		for (const QJsonValue& category : categories) {
 			QJsonObject categoryObj = category.toObject();
 			QString name = categoryObj["name"].toString();
-			QJsonObject settings = categoryObj["settings"].toObject();
-			QJsonArray warningValue = settings["warningValue"].toArray();
+			QJsonArray warningValue = categoryObj["settings"].toObject()["warningValue"].toArray();
 			double max = warningValue[0].toDouble();
 			double min = warningValue[1].toDouble();
 
 			categoryWarnings.insert(name, qMakePair(max, min));
 		}
 
-		warningValues.insert(channelId, categoryWarnings);
+		newWarningValues.insert(channelId, categoryWarnings);
 	}
 
-	qDebug() << "Loaded warning values successfully from:" << jsonFilePath;
-	file.close();
-	return warningValues;
+	// 更新类成员变量
+	this->warningValues = newWarningValues;
 }
+
 
 QMap<int, QString> lplabelAlarm::loadTypeDescriptions() {
 	QString jsonFilePath = QCoreApplication::applicationDirPath() + "/Config/typeDescriptions.json";
@@ -141,14 +130,114 @@ void lplabelAlarm::recvMsg(QByteArray & ba, const MsgReceiverInfo & receiverInfo
 		handleLithiumCentralizer(Centeralarms);
 		break;
 	}
+	case LP_UPDATA_CONFIG:
+	{
+		QString jsonConfig;
+		in >> jsonConfig;
+		updateConfig(jsonConfig);
+		break;
+	}
 	default:
 		break;
 	}
 }
 
+
+void lplabelAlarm::updateConfig(const QString &jsonConfig) {
+	QString jsonFilePath = QCoreApplication::applicationDirPath() + "/Config/Alarm_Lithium.json";
+	QFile file(jsonFilePath);
+
+	// 读取现有配置
+	if (!file.open(QIODevice::ReadOnly)) {
+		qWarning() << "Failed to open file for reading:" << jsonFilePath;
+		return;
+	}
+	QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+	file.close();
+
+	if (!doc.isObject()) {
+		qWarning() << "Invalid JSON document structure.";
+		return;
+	}
+
+	// 解析传入的 JSON 配置
+	QJsonDocument newDoc = QJsonDocument::fromJson(jsonConfig.toUtf8());
+	if (!newDoc.isObject()) {
+		qWarning() << "Invalid new JSON config structure.";
+		return;
+	}
+
+	QJsonObject rootObj = doc.object();
+	QJsonObject channelsObj = rootObj["channels"].toObject();
+	QJsonObject newChannelsObj = newDoc.object()["channels"].toObject();
+	QJsonObject channelsNumObj = rootObj["channels_num"].toObject();
+	QJsonObject newChannelsNumObj = newDoc.object()["channels_num"].toObject();
+
+	// 更新 channels
+	for (const QString &channelId : newChannelsObj.keys()) {
+		if (channelsObj.contains(channelId)) {
+			QJsonObject channelObj = channelsObj[channelId].toObject();
+			QJsonObject newChannelObj = newChannelsObj[channelId].toObject();
+			QJsonArray categoriesArray = channelObj["categories"].toArray();
+			QJsonArray newCategoriesArray = newChannelObj["categories"].toArray();
+
+			for (const QJsonValue &newCategoryValue : newCategoriesArray) {
+				QJsonObject newCategoryObj = newCategoryValue.toObject();
+				bool found = false;
+
+				for (int i = 0; i < categoriesArray.size(); ++i) {
+					QJsonObject categoryObj = categoriesArray[i].toObject();
+					if (categoryObj["name"].toString() == newCategoryObj["name"].toString()) {
+						categoryObj["settings"] = newCategoryObj["settings"];
+						categoriesArray[i] = categoryObj;
+						found = true;
+						break;
+					}
+				}
+
+				if (!found) {
+					qWarning() << "Category not found and not added:" << newCategoryObj["name"].toString();
+				}
+			}
+
+			channelObj["categories"] = categoriesArray;
+			channelsObj[channelId] = channelObj;
+		}
+		else {
+			qWarning() << "Channel not found and not updated:" << channelId;
+		}
+	}
+
+	// 更新 channels_num
+	for (const QString &channelId : newChannelsNumObj.keys()) {
+		if (channelsNumObj.contains(channelId)) {
+			channelsNumObj[channelId] = newChannelsNumObj[channelId];
+		}
+		else {
+			qWarning() << "Channel number not found and not updated:" << channelId;
+		}
+	}
+
+	rootObj["channels"] = channelsObj;
+	rootObj["channels_num"] = channelsNumObj;
+	doc.setObject(rootObj);
+
+	// 写回修改后的配置
+	if (!file.open(QIODevice::WriteOnly)) {
+		qWarning() << "Failed to open file for writing:" << jsonFilePath;
+		return;
+	}
+	file.write(QJsonDocument(rootObj).toJson());
+	file.close();
+
+	// 重新加载配置到内存
+	parseWarningValues();
+}
+
+
 void lplabelAlarm::handleLithiumWidth(const LithiumTypeInfoPub_Tag & Widthalarms)
 {
-	static QMap<QString, QMap<QString, QPair<double, double>>> warningValues = parseWarningValues();
+
 
 	static const QMap<int, QString> typeDescriptions = loadTypeDescriptions();
 
@@ -178,7 +267,6 @@ void lplabelAlarm::handleLithiumWidth(const LithiumTypeInfoPub_Tag & Widthalarms
 
 void lplabelAlarm::handleLithiumAlign(const LithiumCalculatebyInfoPub_Tag &Alignalarms)
 {
-	static QMap<QString, QMap<QString, QPair<double, double>>> warningValues = parseWarningValues();
 	static const QMap<int, QString> typeDescriptions = loadTypeDescriptions();
 
 	// 遍历所有通道
@@ -211,7 +299,6 @@ void lplabelAlarm::handleLithiumAlign(const LithiumCalculatebyInfoPub_Tag &Align
 
 void lplabelAlarm::handleLithiumCentralizer(const LithiumElectrodeRegionCentralizePub_Tag & Centeralarms)
 {
-	static QMap<QString, QMap<QString, QPair<double, double>>> warningValues = parseWarningValues();
 	static const QMap<int, QString> typeDescriptions = loadTypeDescriptions();
 
 	QString description = typeDescriptions.value(Centeralarms.detectType, "未知类型");

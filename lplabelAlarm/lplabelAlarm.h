@@ -132,10 +132,13 @@ public:
 	void handleLithiumAlign(const LithiumCalculatebyInfoPub_Tag &Alignalarms);
 
 	void handleLithiumCentralizer(const LithiumElectrodeRegionCentralizePub_Tag &Centeralarms);
-	QMap<QString, QMap<QString, QPair<double, double>>> lplabelAlarm::parseWarningValues();
+
+	void updateConfig(const QString &jsonConfig);
+	QMap<QString, QMap<QString, QPair<double, double>>> warningValues; // 存储阈值数据
+	//QMap<QString, QMap<QString, QPair<double, double>>> lplabelAlarm::parseWarningValues();
 
 	QMap<int, QString> loadTypeDescriptions();
-
+	void parseWarningValues();
 private:
 	LPRedHandAlarm* m_pAlarmRH;
 
